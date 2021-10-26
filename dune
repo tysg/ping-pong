@@ -1,0 +1,5 @@
+(executables
+ (names server client)
+ (libraries unix lwt lwt.unix)
+ (preprocess
+  (pps lwt_ppx)))
