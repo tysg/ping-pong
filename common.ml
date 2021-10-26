@@ -19,6 +19,7 @@ let read_msg ic =
 
 let rec sender oc ac () =
   let%lwt msg = Lwt_io.read_line Lwt_io.stdin in
+
   let start_time = Unix.gettimeofday () in
   let%lwt () = write_msg oc (Msg msg) in
   let%lwt () = Lwt_mvar.take ac in
@@ -45,16 +46,3 @@ let rec responder ic oc ac () =
 let handle_connection ic oc () =
   let ac = Lwt_mvar.create_empty () in
   pick [ responder ic oc ac (); sender oc ac () ]
-
-let accept_connection conn =
-  let fd, _ = conn in
-  let ic = Lwt_io.of_fd ~mode:Lwt_io.Input fd in
-  let oc = Lwt_io.of_fd ~mode:Lwt_io.Output fd in
-  handle_connection ic oc ()
-
-let create_socket addr () =
-  let open Lwt_unix in
-  let sock = socket PF_INET SOCK_STREAM 0 in
-  let _ = bind sock @@ addr in
-  listen sock 1;
-  sock
